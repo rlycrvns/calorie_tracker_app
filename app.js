@@ -19,10 +19,26 @@ const ItemCtrl = (function () {
     currentItem: null,
     totalCalories: 0,
   };
+  // Public Methods
+  return {
+    logData: function () {
+      return data;
+    },
+  };
 })();
 
 // UI Controller
-const UICtrl = (function () {})();
+const UICtrl = (function () {
+  // Public Methods
+  return {};
+})();
 
 // App Controller
-const AppCtrl = (function (ItemCtrl, UICtrl) {})(ItemCtrl, UICtrl);
+const App = (function (ItemCtrl, UICtrl) {
+  // Public Methods
+  return {
+    init: function () {
+      console.log('Initializing App...');
+    },
+  };
+})(ItemCtrl, UICtrl);
