@@ -24,6 +24,26 @@ const ItemCtrl = (function () {
     getItems: function () {
       return data.items;
     },
+    addItem: function (name, calories) {
+      // create ID
+      let ID;
+      if (data.items.length > 0) {
+        ID = data.items[data.items.length - 1].id + 1;
+      } else {
+        ID = 0;
+      }
+
+      // calories to number
+      calories = parseInt(calories);
+
+      // create new item
+      newItem = new Item(ID, name, calories);
+
+      // add to items array
+      data.items.push(newItem);
+
+      return newItem;
+    },
     logData: function () {
       return data;
     },
@@ -57,8 +77,8 @@ const UICtrl = (function () {
     },
     getItemInput: function () {
       return {
-        name: document.querySelector(UISelectors.itemNameInput.value),
-        calories: document.querySelector(UISelectors.itemCaloriesInput.value),
+        name: document.querySelector(UISelectors.itemNameInput).value,
+        calories: document.querySelector(UISelectors.itemCaloriesInput).value,
       };
     },
     getSelectors: function () {
@@ -83,6 +103,14 @@ const App = (function (ItemCtrl, UICtrl) {
   // Add item submit
   const itemAddSubmit = function (e) {
     // get form input from form controller
+    const input = UICtrl.getItemInput();
+
+    // check for name and calorie input
+    if (input.name !== '' && input.calories !== '') {
+      // add item
+      const newItem = ItemCtrl.addItem(input.name, input.calories);
+    }
+
     e.preventDefault();
   };
   // Public Methods
