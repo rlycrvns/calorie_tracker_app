@@ -54,6 +54,21 @@ const ItemCtrl = (function () {
       });
       return found;
     },
+    updateItem: function (name, calories) {
+      // carlories to number
+      calories = parseInt(calories);
+
+      let found = null;
+
+      data.items.forEach(function (item) {
+        if (item.id === data.currentItem.id) {
+          item.name = name;
+          item.calories = calories;
+          found = item;
+        }
+      });
+      return found;
+    },
     setCurrentItem: function (item) {
       data.currentItem = item;
     },
@@ -83,6 +98,7 @@ const ItemCtrl = (function () {
 const UICtrl = (function () {
   const UISelectors = {
     itemList: '#item-list',
+    listItems: '#item-list li',
     addBtn: '.add-btn',
     updateBtn: '.update-btn',
     deleteBtn: '.delete-btn',
@@ -132,6 +148,25 @@ const UICtrl = (function () {
       document
         .querySelector(UISelectors.itemList)
         .insertAdjacentElement('beforeend', li);
+    },
+    updateListItem: function (item) {
+      let listItems = document.querySelectorAll(UISelectors.listItems);
+
+      // turn node list into array
+      listItems = Array.from(listItems);
+
+      listItems.forEach(function (listItem) {
+        const itemID = listItem.getAttribute('id');
+
+        if (itemID === `item-${item.id}`) {
+          document.querySelector(
+            `#${itemID}`
+          ).innerHTML = `<strong>${item.name}: </strong> <em>${item.calories} Calories</em>
+          <a href="#" class="secondary-content">
+            <i class="edit-item fa fa-pencil"></i>
+          </a>`;
+        }
+      });
     },
     clearInput: function () {
       document.querySelector(UISelectors.itemNameInput).value = '';
@@ -185,10 +220,28 @@ const App = (function (ItemCtrl, UICtrl) {
       .querySelector(UISelectors.addBtn)
       .addEventListener('click', itemAddSubmit);
 
+    // disable submit on enter
+    document.addEventListener('keypress', function (e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        return false;
+      }
+    });
+
     // Edit icon click
     document
       .querySelector(UISelectors.itemList)
+      .addEventListener('click', itemEditClick);
+
+    // update item event
+    document
+      .querySelector(UISelectors.updateBtn)
       .addEventListener('click', itemUpdateSubmit);
+
+    // back button event
+    document
+      .querySelector(UISelectors.backBtn)
+      .addEventListener('click', UICtrl.clearEditState);
   };
 
   // Add item submit
@@ -215,8 +268,8 @@ const App = (function (ItemCtrl, UICtrl) {
     e.preventDefault();
   };
 
-  // update item submit
-  const itemUpdateSubmit = function (e) {
+  // click edit item
+  const itemEditClick = function (e) {
     if (e.target.classList.contains('edit-item')) {
       // get list item id
       const listID = e.target.parentNode.parentNode.id;
@@ -236,6 +289,27 @@ const App = (function (ItemCtrl, UICtrl) {
       // add item to form
       UICtrl.addItemToForm();
     }
+    e.preventDefault();
+  };
+
+  // Update item submit
+  const itemUpdateSubmit = function (e) {
+    // get item input
+    const input = UICtrl.getItemInput();
+
+    // update item
+    const updatedItem = ItemCtrl.updateItem(input.name, input.calories);
+
+    // update UI
+    UICtrl.updateListItem(updatedItem);
+
+    // Get total calories
+    const totalCalories = ItemCtrl.getTotalCalories();
+    // add total calories to UI
+    UICtrl.showTotalCalories(totalCalories);
+
+    UICtrl.clearEditState();
+
     e.preventDefault();
   };
 
