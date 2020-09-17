@@ -25,13 +25,36 @@ const StorageCtrl = (function () {
     },
     getItemsFromStorage: function () {
       let items;
-      if (localStorage.getItem('items' == null)) {
+      if (localStorage.getItem('items') === null) {
         items = [];
       } else {
         items = JSON.parse(localStorage.getItem('items'));
       }
 
       return items;
+    },
+    updateItemStorage: function (updatedItem) {
+      let items = JSON.parse(localStorage.getItem('items'));
+
+      items.forEach(function (item, index) {
+        if (updatedItem.id === item.id) {
+          items.splice(index, 1, updatedItem);
+        }
+      });
+      localStorage.setItem('items', JSON.stringify(items));
+    },
+    deleteItemFromStorage: function (id) {
+      let items = JSON.parse(localStorage.getItem('items'));
+
+      items.forEach(function (item, index) {
+        if (id === item.id) {
+          items.splice(index, 1);
+        }
+      });
+      localStorage.setItem('items', JSON.stringify(items));
+    },
+    clearItemsFromStorage: function () {
+      localStorage.removeItem('items');
     },
   };
 })();
@@ -306,6 +329,11 @@ const App = (function (ItemCtrl, StorageCtrl, UICtrl) {
       .querySelector(UISelectors.deleteBtn)
       .addEventListener('click', itemDeleteSubmit);
 
+    // back button event
+    document
+      .querySelector(UISelectors.backBtn)
+      .addEventListener('click', UICtrl.clearEditState);
+
     // clear items event
     document
       .querySelector(UISelectors.clearBtn)
@@ -384,6 +412,9 @@ const App = (function (ItemCtrl, StorageCtrl, UICtrl) {
     // add total calories to UI
     UICtrl.showTotalCalories(totalCalories);
 
+    // update ls
+    StorageCtrl.updateItemStorage(updatedItem);
+
     UICtrl.clearEditState();
 
     e.preventDefault();
@@ -405,13 +436,16 @@ const App = (function (ItemCtrl, StorageCtrl, UICtrl) {
     // add total calories to UI
     UICtrl.showTotalCalories(totalCalories);
 
+    // delete from local storage
+    StorageCtrl.deleteItemFromStorage(currentItem.id);
+
     UICtrl.clearEditState();
 
     e.preventDefault();
   };
 
   // clear items event
-  const clearAllItemsClick = function (e) {
+  const clearAllItemsClick = function () {
     // delete all items from data
     ItemCtrl.clearAllItems();
 
@@ -423,10 +457,11 @@ const App = (function (ItemCtrl, StorageCtrl, UICtrl) {
     // remove from UI
     UICtrl.removeItems();
 
+    // remove from ls
+    StorageCtrl.clearItemsFromStorage();
+
     // hide UL
     UICtrl.hideList();
-
-    e.preventDefault();
   };
 
   // Public Methods
